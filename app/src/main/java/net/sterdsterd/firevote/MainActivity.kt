@@ -17,6 +17,7 @@ import android.Manifest.permission.READ_CONTACTS
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.opengl.Visibility
+import android.util.DisplayMetrics
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -81,6 +82,7 @@ class MainActivity : AppCompatActivity() {
                     coordinator,
                     "투표하였습니다", Snackbar.LENGTH_LONG
                 )
+                checkAbility(did, fab)
             } else {
                 fab.hide()
                 snackbar = Snackbar.make(
@@ -88,32 +90,34 @@ class MainActivity : AppCompatActivity() {
                     "항목을 선택해주세요",
                     Snackbar.LENGTH_LONG
                 )
+
+                val snackbarView = snackbar.view
+                val params = snackbarView.layoutParams as CoordinatorLayout.LayoutParams
+
+                params.setMargins(
+                    params.leftMargin + dp2px(16, this),
+                    params.topMargin,
+                    params.rightMargin + dp2px(16, this),
+                    params.bottomMargin + dp2px(72 + 16, this)
+                )
+
+                snackbarView.layoutParams = params
+
+                snackbar.view.background = this.getDrawable(R.drawable.bg_snack)
+
+                snackbar.addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+
+                    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                        fab.show()
+                        super.onDismissed(transientBottomBar, event)
+                    }
+                })
+                snackbar.show()
             }
-
-            fab.hide()
-            val snackbarView = snackbar.view
-            val params = snackbarView.layoutParams as CoordinatorLayout.LayoutParams
-
-            params.setMargins(
-                params.leftMargin + 48,
-                params.topMargin,
-                params.rightMargin + 48,
-                params.bottomMargin + 192
-            )
-
-            snackbarView.layoutParams = params
-
-            snackbar.view.background = this.getDrawable(R.drawable.bg_snack)
-
-            snackbar.addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
-
-                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                    checkAbility(did, fab)
-                    super.onDismissed(transientBottomBar, event)
-                }
-            })
         }
     }
+
+    fun dp2px(dp: Int, context: Context) = (dp * (context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT))
 
     fun checkAbility(did: String, fab:FloatingActionButton){
         var dbRef = FirebaseDatabase.getInstance().getReference()
